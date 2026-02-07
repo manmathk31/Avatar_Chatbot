@@ -23,6 +23,17 @@
 
         <div class="auth-card">
             {% block auth_content %}{% endblock %}
+
+            <div class="auth-footer"
+                style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                {% block auth_footer %}{% endblock %}
+                <p style="margin-top: 0.75rem;">
+                    <a href="{{ url_for('welcome') }}"
+                        style="color: #6b7280; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                        ← Back to Home
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </div>

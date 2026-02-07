@@ -700,7 +700,7 @@
                     <div class="tooltip">AI Chat</div>
                 </li>
 
-                {% if current_user.role in ['teacher', 'professional', 'institute'] %}
+                {% if current_user.role in ['teacher', 'professional', 'institute', 'student'] %}
                 <li class="sidebar-nav-item">
                     <a href="{{ url_for('upload') }}"
                         class="sidebar-nav-link {% if request.path == url_for('upload') %}active{% endif %}">
