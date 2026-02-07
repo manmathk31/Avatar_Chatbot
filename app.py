@@ -399,17 +399,23 @@ def resources():
 
 # Removed routes: /knowledge_base and /admin_tools (unused pages)
 
-# --- App Execution ---
-if __name__ == "__main__":
-    # Ensure all necessary directories exist
+# --- App Initialization for Production (Gunicorn) ---
+# CRITICAL: This block must be outside "if __name__ == '__main__':"
+# Railway uses Gunicorn, which imports 'app' but does NOT run main().
+# If this is inside main(), your database tables will NEVER be created on Railway.
+with app.app_context():
+    # Create directories if they don't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'previews'), exist_ok=True)
     os.makedirs('static/audio', exist_ok=True)
     os.makedirs('static/css', exist_ok=True)
-
-    with app.app_context():
-        db.create_all() # This creates/updates all tables (User, Chatbot, UploadedPDF)
     
+    # Create database tables
+    db.create_all()
+    print("✅ Database tables created successfully!")
+
+if __name__ == "__main__":
+    # This block only runs when you execute 'python app.py' locally 'or' if you run it directly in a container.
     # 👈 UPDATED: Use PORT from environment for Railway
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False) # Debug=False for production!
