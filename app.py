@@ -27,7 +27,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pdfs.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'a-very-secret-key-you-must-change' # 👈 ADD THIS
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key-change-this') # 👈 UPDATED for Env
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app) # 👈 ADD THIS
@@ -356,7 +356,7 @@ def speak():
     return jsonify({"audio_url": url_for('static', filename=audio_filename)})
 
 # 👈 Set your FastAPI URL here
-BASE_FASTAPI_URL = "http://127.0.0.1:8000" # Example: "http://127.0.0.1:8000"
+BASE_FASTAPI_URL = os.environ.get('BASE_FASTAPI_URL', "http://127.0.0.1:8000") # 👈 UPDATED for Env
 
 @app.route("/stream_response", methods=["POST"])
 def stream_response():
@@ -409,4 +409,7 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all() # This creates/updates all tables (User, Chatbot, UploadedPDF)
-    app.run(debug=True)
+    
+    # 👈 UPDATED: Use PORT from environment for Railway
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False) # Debug=False for production!
