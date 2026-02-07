@@ -1,0 +1,675 @@
+{% extends "auth_layout.html" %}
+
+{% block auth_content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  
+  /* Reset auth layout constraints for full landing */
+  body.landing-page .auth-layout { 
+    min-height: 100vh; 
+    padding: 0; 
+    background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+  }
+  body.landing-page .auth-layout .auth-container { 
+    max-width: 100%; 
+    width: 100%; 
+    margin: 0;
+  }
+  body.landing-page .auth-layout .auth-card { 
+    padding: 0; 
+    box-shadow: none; 
+    background: transparent; 
+    border-radius: 0;
+  }
+  body.landing-page .auth-layout .auth-header { 
+    display: none; 
+  }
+  
+  /* Modern SaaS Typography */
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Hero Section */
+  .saas-hero {
+    padding: 120px 24px 80px;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .saas-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 120%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .saas-hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .saas-hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #0f172a;
+    margin: 0 0 24px;
+    letter-spacing: -0.02em;
+    animation: fadeInUp 0.6s ease-out 0.1s both;
+  }
+  
+  .saas-hero-subtitle {
+    font-size: clamp(18px, 2.5vw, 22px);
+    line-height: 1.6;
+    color: #64748b;
+    max-width: 680px;
+    margin: 0 auto 48px;
+    font-weight: 400;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+  }
+  
+  .saas-cta-group {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+  }
+  
+  .saas-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    border: none;
+    cursor: pointer;
+  }
+  
+  .saas-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    text-decoration: none;
+    color: white;
+  }
+  
+  .saas-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 14px 32px;
+    background: white;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+  }
+  
+  .saas-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: #0f172a;
+    border-color: #cbd5e1;
+  }
+  
+  /* Features Section */
+  .saas-section {
+    padding: 100px 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  
+  .saas-section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  
+  .saas-section-label {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .saas-section-title {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 20px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  
+  .saas-section-description {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #64748b;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  
+  .saas-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 64px;
+  }
+  
+  .saas-feature-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .saas-feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .saas-feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+  }
+  
+  .saas-feature-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .saas-feature-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .saas-feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px;
+  }
+  
+  .saas-feature-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #64748b;
+    margin: 0;
+  }
+  
+  /* Role Cards */
+  .saas-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 64px;
+  }
+  
+  .saas-role-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 32px;
+    border: 2px solid #e2e8f0;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .saas-role-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .saas-role-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    border-color: #10b981;
+    text-decoration: none;
+  }
+  
+  .saas-role-card:hover::after {
+    opacity: 1;
+  }
+  
+  .saas-role-card h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-role-card p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #64748b;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* How It Works */
+  .saas-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    margin-top: 64px;
+    counter-reset: step-counter;
+  }
+  
+  .saas-step {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 32px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    counter-increment: step-counter;
+    transition: all 0.3s ease;
+  }
+  
+  .saas-step:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+  
+  .saas-step-number {
+    position: absolute;
+    top: -20px;
+    left: 32px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  .saas-step-number::before {
+    content: counter(step-counter);
+  }
+  
+  .saas-step-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 16px 0 12px;
+  }
+  
+  .saas-step-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #64748b;
+    margin: 0;
+  }
+  
+  /* Final CTA */
+  .saas-cta-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 24px;
+    padding: 80px 40px;
+    text-align: center;
+    margin: 100px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .saas-cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .saas-cta-title {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800;
+    color: white;
+    margin: 0 0 20px;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-cta-description {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-cta-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
+    text-decoration: none;
+    color: white;
+  }
+  
+  .saas-cta-login {
+    display: block;
+    margin-top: 20px;
+    color: #94a3b8;
+    font-size: 16px;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .saas-cta-login:hover {
+    color: white;
+    text-decoration: underline;
+  }
+  
+  /* Footer */
+  .saas-footer {
+    padding: 60px 24px 40px;
+    border-top: 1px solid #e2e8f0;
+    background: #fafbfc;
+  }
+  
+  .saas-footer-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .saas-footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  
+  .saas-footer-links a {
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .saas-footer-links a:hover {
+    color: #10b981;
+    text-decoration: none;
+  }
+  
+  .saas-footer-copyright {
+    color: #94a3b8;
+    font-size: 14px;
+    margin: 0;
+  }
+  
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .saas-hero {
+      padding: 80px 20px 60px;
+    }
+    
+    .saas-section {
+      padding: 60px 20px;
+    }
+    
+    .saas-features-grid,
+    .saas-roles-grid,
+    .saas-steps {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    .saas-cta-section {
+      padding: 60px 24px;
+      margin: 60px 20px;
+    }
+    
+    .saas-footer-links {
+      gap: 20px;
+    }
+  }
+</style>
+<script>document.body.classList.add('landing-page');</script>
+
+<!-- Hero Section -->
+<section class="saas-hero">
+  <div class="saas-hero-content">
+    <div class="saas-hero-badge">✨ AI-Powered Education Platform</div>
+    <h1>Build intelligent AI assistants<br>with voice & avatar interaction</h1>
+    <p class="saas-hero-subtitle">
+      Create custom AI chatbots powered by your knowledge. Deploy secure, interactive assistants 
+      for students, teams, and customers with lifelike avatars and natural voice interaction.
+    </p>
+    <div class="saas-cta-group">
+      <a href="{{ url_for('register', role='student') }}" class="saas-btn-primary">Get Started Free</a>
+      <a href="{{ url_for('login') }}" class="saas-btn-secondary">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="saas-section" aria-labelledby="features-heading">
+  <div class="saas-section-header">
+    <div class="saas-section-label">Features</div>
+    <h2 id="features-heading" class="saas-section-title">Everything you need to build AI assistants</h2>
+    <p class="saas-section-description">
+      Powerful tools combined in one platform to create, deploy, and manage intelligent chatbots.
+    </p>
+  </div>
+  <div class="saas-features-grid">
+    <div class="saas-feature-card">
+      <div class="saas-feature-icon">🤖</div>
+      <h3 class="saas-feature-title">AI Avatar</h3>
+      <p class="saas-feature-description">
+        Interact with a lifelike 3D avatar that responds in real-time, making conversations more engaging and human-like.
+      </p>
+    </div>
+    <div class="saas-feature-card">
+      <div class="saas-feature-icon">🎤</div>
+      <h3 class="saas-feature-title">Voice Interaction</h3>
+      <p class="saas-feature-description">
+        Speak naturally and get instant responses. Built-in speech recognition and text-to-speech for seamless voice conversations.
+      </p>
+    </div>
+    <div class="saas-feature-card">
+      <div class="saas-feature-icon">📚</div>
+      <h3 class="saas-feature-title">Knowledge Base</h3>
+      <p class="saas-feature-description">
+        Upload PDFs and documents to build a custom knowledge base. Ask questions and get accurate answers from your content.
+      </p>
+    </div>
+    <div class="saas-feature-card">
+      <div class="saas-feature-icon">🔒</div>
+      <h3 class="saas-feature-title">Secure & Private</h3>
+      <p class="saas-feature-description">
+        Role-based access control, secure authentication, and data privacy built-in. Your knowledge stays protected.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Role Selection -->
+<section class="saas-section" aria-labelledby="roles-heading">
+  <div class="saas-section-header">
+    <div class="saas-section-label">Get Started</div>
+    <h2 id="roles-heading" class="saas-section-title">Choose your role</h2>
+    <p class="saas-section-description">
+      Select the account type that best fits your needs. Each role comes with tailored features and permissions.
+    </p>
+  </div>
+  <div class="saas-roles-grid">
+    <a href="{{ url_for('register', role='teacher') }}" class="saas-role-card">
+      <h3>Teacher / Educator</h3>
+      <p>Create and manage custom AI chatbots for your students. Upload course materials and deploy interactive learning assistants.</p>
+    </a>
+    <a href="{{ url_for('register', role='professional') }}" class="saas-role-card">
+      <h3>Professional / Company</h3>
+      <p>Build AI assistants for your team or customer support. Deploy knowledge-backed chatbots for internal use or clients.</p>
+    </a>
+    <a href="{{ url_for('register', role='student') }}" class="saas-role-card">
+      <h3>Student / Learner</h3>
+      <p>Access and interact with AI assistants from your institution. Get instant answers and learn with interactive AI avatars.</p>
+    </a>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="saas-section" aria-labelledby="how-heading">
+  <div class="saas-section-header">
+    <div class="saas-section-label">How It Works</div>
+    <h2 id="how-heading" class="saas-section-title">Get started in three simple steps</h2>
+    <p class="saas-section-description">
+      From signup to deployment, get your AI assistant running in minutes.
+    </p>
+  </div>
+  <div class="saas-steps">
+    <div class="saas-step">
+      <div class="saas-step-number"></div>
+      <h3 class="saas-step-title">Create Your Account</h3>
+      <p class="saas-step-description">
+        Sign up as a teacher, professional, or student. Choose the role that matches your needs and get instant access.
+      </p>
+    </div>
+    <div class="saas-step">
+      <div class="saas-step-number"></div>
+      <h3 class="saas-step-title">Upload Knowledge</h3>
+      <p class="saas-step-description">
+        Creators can upload PDFs and configure AI assistants. Everyone can start asking questions right away.
+      </p>
+    </div>
+    <div class="saas-step">
+      <div class="saas-step-number"></div>
+      <h3 class="saas-step-title">Interact with AI</h3>
+      <p class="saas-step-description">
+        Chat by text or voice and watch the AI avatar respond in real-time. Experience natural, engaging conversations.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="saas-cta-section">
+  <h2 class="saas-cta-title">Ready to build your AI assistant?</h2>
+  <p class="saas-cta-description">
+    Join educators, professionals, and students who are already using AI avatars to transform how they learn and work.
+  </p>
+  <a href="{{ url_for('register', role='student') }}" class="saas-cta-button">Start Free Trial</a>
+  <a href="{{ url_for('login') }}" class="saas-cta-login">Already have an account? Sign in →</a>
+</section>
+
+<!-- Footer -->
+<footer class="saas-footer">
+  <div class="saas-footer-content">
+    <nav class="saas-footer-links" aria-label="Footer navigation">
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">College</a>
+      <a href="#">GitHub</a>
+    </nav>
+    <p class="saas-footer-copyright">&copy; 2025 AI Platform. All rights reserved.</p>
+  </div>
+</footer>
+{% endblock %}

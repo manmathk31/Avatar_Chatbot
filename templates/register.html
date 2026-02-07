@@ -1,0 +1,800 @@
+{% extends "auth_layout.html" %}
+
+{% block auth_content %}
+<style>
+    /* ═══════════════════════════════════════════════════════════════
+   REGISTER PAGE STYLES - Scoped to this page only
+═══════════════════════════════════════════════════════════════ */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* Override auth-layout for this page */
+    .auth-layout {
+        background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 50%, #d1fae5 100%) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-layout::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+            radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+        animation: bgShift 20s ease-in-out infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    @keyframes bgShift {
+
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+
+        50% {
+            transform: translate(2%, 2%);
+        }
+    }
+
+    .auth-container {
+        position: relative;
+        z-index: 10;
+        animation: slideUp 0.6s ease-out;
+        max-width: 560px !important;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-header {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .auth-header .logo {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        background: linear-gradient(135deg, #059669, #047857);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-decoration: none !important;
+    }
+
+    .auth-header h1 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1.75rem !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        letter-spacing: -0.02em;
+    }
+
+    .auth-card {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 1.5rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.15),
+            0 0 40px rgba(16, 185, 129, 0.1) !important;
+        padding: 2rem !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #34d399, #10b981, #059669);
+        z-index: 10;
+    }
+
+    /* Floating shapes */
+    .reg-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .reg-shape {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.5;
+    }
+
+    .reg-shape-1 {
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, #a7f3d0, #d1fae5);
+        top: -100px;
+        right: -100px;
+        animation: floatShape 8s ease-in-out infinite;
+    }
+
+    .reg-shape-2 {
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #6ee7b7, #a7f3d0);
+        bottom: -50px;
+        left: -50px;
+        animation: floatShape 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatShape {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    /* Role Badge */
+    .reg-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border: 1px solid #a7f3d0;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #047857;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .reg-role-badge svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Subtitle */
+    .reg-subtitle {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #6b7280;
+        margin: 0.75rem 0 1.25rem 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Form Errors */
+    .form-error-list {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2) !important;
+        border: 1px solid #fecaca !important;
+        border-radius: 0.75rem !important;
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 1rem !important;
+        list-style: none !important;
+    }
+
+    .form-error-list li {
+        font-size: 0.8rem;
+        color: #b91c1c;
+        padding: 0.15rem 0;
+    }
+
+    .form-error-list li::before {
+        content: '• ';
+        color: #ef4444;
+    }
+
+    /* Form styles */
+    .reg-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Two column grid */
+    .reg-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 500px) {
+        .reg-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .reg-form-group {
+        position: relative;
+    }
+
+    .reg-form-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.4rem;
+    }
+
+    .reg-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .reg-input-icon {
+        position: absolute;
+        left: 0.85rem;
+        width: 18px;
+        height: 18px;
+        color: #9ca3af;
+        pointer-events: none;
+        z-index: 2;
+        transition: color 0.15s;
+    }
+
+    .reg-form-input {
+        width: 100%;
+        padding: 0.75rem 0.85rem 0.75rem 2.5rem;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        color: #1f2937;
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.6rem;
+        outline: none;
+        transition: all 0.15s;
+    }
+
+    .reg-form-input::placeholder {
+        color: #9ca3af;
+    }
+
+    .reg-form-input:hover {
+        border-color: #d1d5db;
+    }
+
+    .reg-form-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .reg-form-input:focus~.reg-input-icon {
+        color: #10b981;
+    }
+
+    .reg-form-input.has-toggle {
+        padding-right: 2.5rem;
+    }
+
+    /* Password Toggle */
+    .reg-password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        padding: 0.2rem;
+        cursor: pointer;
+        color: #9ca3af;
+        z-index: 2;
+    }
+
+    .reg-password-toggle:hover {
+        color: #6b7280;
+    }
+
+    .reg-password-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Password Strength */
+    .reg-password-strength {
+        margin-top: 0.5rem;
+    }
+
+    .reg-strength-bar {
+        display: flex;
+        gap: 0.2rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .reg-strength-segment {
+        flex: 1;
+        height: 3px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        transition: background 0.15s;
+    }
+
+    .reg-strength-segment.active.weak {
+        background: #ef4444;
+    }
+
+    .reg-strength-segment.active.medium {
+        background: #f59e0b;
+    }
+
+    .reg-strength-segment.active.strong {
+        background: #10b981;
+    }
+
+    .reg-strength-text {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #6b7280;
+    }
+
+    .reg-strength-text.weak {
+        color: #ef4444;
+    }
+
+    .reg-strength-text.medium {
+        color: #f59e0b;
+    }
+
+    .reg-strength-text.strong {
+        color: #10b981;
+    }
+
+    /* Checkbox */
+    .reg-checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .reg-checkbox {
+        width: 1rem;
+        height: 1rem;
+        accent-color: #10b981;
+        cursor: pointer;
+        margin-top: 0.15rem;
+    }
+
+    .reg-checkbox-label {
+        font-size: 0.8rem;
+        color: #4b5563;
+        line-height: 1.4;
+    }
+
+    .reg-checkbox-label a {
+        color: #059669;
+        text-decoration: none;
+    }
+
+    .reg-checkbox-label a:hover {
+        text-decoration: underline;
+    }
+
+    /* Primary Button */
+    .reg-btn-primary {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        color: white;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reg-btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .reg-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .reg-btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .reg-btn-primary svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Divider */
+    .reg-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .reg-divider-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #d1d5db, transparent);
+    }
+
+    .reg-divider-text {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Social Buttons - Horizontal */
+    .reg-social-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    .reg-btn-social {
+        padding: 0.6rem 0.75rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.6rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .reg-btn-social:hover {
+        border-color: #d1d5db;
+        background: #f9fafb;
+        transform: translateY(-1px);
+    }
+
+    .reg-btn-social svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .reg-btn-google:hover {
+        border-color: #ea4335;
+        background: #fff8f7;
+    }
+
+    .reg-btn-github:hover {
+        border-color: #333;
+        background: #f6f6f6;
+    }
+
+    /* Footer override */
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .auth-footer p {
+        font-size: 0.9rem;
+        color: #4b5563;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .auth-footer a {
+        color: #059669 !important;
+        font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+        color: #047857 !important;
+    }
+
+    /* Animations */
+    .reg-fade-in {
+        animation: regFadeIn 0.5s ease-out both;
+    }
+
+    @keyframes regFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .reg-stagger-1 {
+        animation-delay: 0.05s;
+    }
+
+    .reg-stagger-2 {
+        animation-delay: 0.1s;
+    }
+
+    .reg-stagger-3 {
+        animation-delay: 0.15s;
+    }
+
+    .reg-stagger-4 {
+        animation-delay: 0.2s;
+    }
+
+    .reg-stagger-5 {
+        animation-delay: 0.25s;
+    }
+</style>
+
+<!-- Floating Shapes -->
+<div class="reg-shapes">
+    <div class="reg-shape reg-shape-1"></div>
+    <div class="reg-shape reg-shape-2"></div>
+</div>
+
+<div style="text-align: center;">
+    <span class="reg-role-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+        </svg>
+        {{ role }} account
+    </span>
+</div>
+
+<p class="reg-subtitle">Create your account to get started.</p>
+
+{% if form.errors %}
+<ul class="form-error-list">
+    {% for field_name, field_errors in form.errors.items() %}
+    {% for error in field_errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="POST" action="" class="reg-form">
+    {{ form.hidden_tag() }}
+
+    <!-- Row 1: Name & Username -->
+    <div class="reg-form-grid reg-fade-in reg-stagger-1">
+        <div class="reg-form-group">
+            <label for="name" class="reg-form-label">Full Name</label>
+            <div class="reg-input-wrapper">
+                <input type="text" id="name" name="name" class="reg-form-input" placeholder="Jane Doe"
+                    value="{{ form.name.data or '' }}" required>
+                <svg class="reg-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+        </div>
+        <div class="reg-form-group">
+            <label for="username" class="reg-form-label">Username</label>
+            <div class="reg-input-wrapper">
+                <input type="text" id="username" name="username" class="reg-form-input" placeholder="janedoe99"
+                    value="{{ form.username.data or '' }}" required>
+                <svg class="reg-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Email -->
+    <div class="reg-form-group reg-fade-in reg-stagger-2">
+        <label for="email" class="reg-form-label">Email Address</label>
+        <div class="reg-input-wrapper">
+            <input type="email" id="email" name="email" class="reg-form-input" placeholder="you@example.com"
+                value="{{ form.email.data or '' }}" required>
+            <svg class="reg-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Row 3: Password & Confirm -->
+    <div class="reg-form-grid reg-fade-in reg-stagger-3">
+        <div class="reg-form-group">
+            <label for="password" class="reg-form-label">Password</label>
+            <div class="reg-input-wrapper">
+                <input type="password" id="password" name="password" class="reg-form-input has-toggle"
+                    placeholder="Min 6 chars" required oninput="updatePwStrength(this.value)">
+                <svg class="reg-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <button type="button" class="reg-password-toggle" onclick="togglePw('password', this)">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="display:none;">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="reg-form-group">
+            <label for="confirm_password" class="reg-form-label">Confirm Password</label>
+            <div class="reg-input-wrapper">
+                <input type="password" id="confirm_password" name="confirm_password" class="reg-form-input has-toggle"
+                    placeholder="Retype" required>
+                <svg class="reg-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <button type="button" class="reg-password-toggle" onclick="togglePw('confirm_password', this)">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="display:none;">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Strength -->
+    <div class="reg-password-strength reg-fade-in reg-stagger-4" id="pwStrength">
+        <div class="reg-strength-bar">
+            <div class="reg-strength-segment"></div>
+            <div class="reg-strength-segment"></div>
+            <div class="reg-strength-segment"></div>
+            <div class="reg-strength-segment"></div>
+        </div>
+        <span class="reg-strength-text"></span>
+    </div>
+
+    <!-- Terms -->
+    <div class="reg-checkbox-group reg-fade-in reg-stagger-4">
+        <input type="checkbox" id="terms" name="terms" class="reg-checkbox" required>
+        <label for="terms" class="reg-checkbox-label">I agree to the <a href="#">Terms</a> and <a href="#">Privacy
+                Policy</a></label>
+    </div>
+
+    <!-- Submit -->
+    <div class="reg-form-group reg-fade-in reg-stagger-5">
+        <button type="submit" class="reg-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="8.5" cy="7" r="4" />
+                <line x1="20" y1="8" x2="20" y2="14" />
+                <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+            Create Account
+        </button>
+    </div>
+</form>
+
+<!-- Divider -->
+<div class="reg-divider">
+    <span class="reg-divider-line"></span>
+    <span class="reg-divider-text">or</span>
+    <span class="reg-divider-line"></span>
+</div>
+
+<!-- Social -->
+<div class="reg-social-grid">
+    <button type="button" class="reg-btn-social reg-btn-google" onclick="alert('Google signup coming soon!')">
+        <svg viewBox="0 0 24 24">
+            <path fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        Google
+    </button>
+    <button type="button" class="reg-btn-social reg-btn-github" onclick="alert('GitHub signup coming soon!')">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+        </svg>
+        GitHub
+    </button>
+</div>
+
+<script>
+    function togglePw(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var eyeOpen = btn.querySelector('.eye-open');
+        var eyeClosed = btn.querySelector('.eye-closed');
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeOpen.style.display = 'none';
+            eyeClosed.style.display = 'block';
+        } else {
+            input.type = 'password';
+            eyeOpen.style.display = 'block';
+            eyeClosed.style.display = 'none';
+        }
+    }
+
+    function updatePwStrength(pw) {
+        var strength = 0;
+        if (pw.length >= 6) strength++;
+        if (pw.length >= 10) strength++;
+        if (/[A-Z]/.test(pw)) strength++;
+        if (/[0-9]/.test(pw)) strength++;
+        if (/[^A-Za-z0-9]/.test(pw)) strength++;
+        strength = Math.min(strength, 4);
+
+        var container = document.getElementById('pwStrength');
+        var segments = container.querySelectorAll('.reg-strength-segment');
+        var textEl = container.querySelector('.reg-strength-text');
+
+        segments.forEach(function (seg, i) {
+            seg.classList.remove('active', 'weak', 'medium', 'strong');
+            if (i < strength) {
+                seg.classList.add('active');
+                if (strength <= 1) seg.classList.add('weak');
+                else if (strength <= 3) seg.classList.add('medium');
+                else seg.classList.add('strong');
+            }
+        });
+
+        var labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+        var classes = ['', 'weak', 'medium', 'medium', 'strong'];
+        textEl.textContent = pw ? (labels[strength] || 'Weak') : '';
+        textEl.className = 'reg-strength-text ' + (classes[strength] || '');
+    }
+</script>
+{% endblock %}
+
+{% block auth_footer %}
+<p>Already have an account? <a href="{{ url_for('login') }}">Sign in here</a></p>
+{% endblock %}

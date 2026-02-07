@@ -1,0 +1,163 @@
+{% extends "app_layout.html" %}
+
+{% block app_content %}
+<div class="page-header">
+    <h1>Document Management</h1>
+    <p>Upload, view, and manage your knowledge documents.</p>
+</div>
+
+<div class="main-content-grid">
+    <!-- Left Column: Uploaded Documents -->
+    <div class="main-column">
+        <div class="card">
+            <div class="card-header">
+                <h3>Uploaded Documents</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <ul class="item-list" id="files-list">
+                    <li class="item-list-entry">
+                        <p style="color: var(--color-text-light); margin: 0;">Loading...</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Upload & Database Status -->
+    <div class="sidebar-column">
+        <div class="card">
+            <div class="card-header">
+                <h3>Upload Documents</h3>
+            </div>
+            <form id="upload-form" method="POST" enctype="multipart/form-data">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="files">Select files (PDF, TXT, DOCX, MD)</label>
+                        <input type="file" id="files" name="files" multiple accept=".pdf,.txt,.docx,.md"
+                            class="form-control" required>
+                    </div>
+                </div>
+                <div class="card-footer" style="text-align: right;">
+                    <button type="button" class="btn btn-primary" onclick="uploadDocuments()">Process Documents</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Upload Status -->
+        <div id="upload-status" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <div id="status-message" class="alert"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Database Status</h3>
+            </div>
+            <div class="card-body" id="db-status">
+                <p style="color: var(--color-text-light);">Loading...</p>
+            </div>
+            <div class="card-footer" style="text-align: center;">
+                <button type="button" class="btn btn-sm btn-primary" onclick="loadDatabaseInfo()">Refresh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load database stats and files on page load
+    function loadDatabaseInfo() {
+        fetch('http://127.0.0.1:8000/db_stats')
+            .then(response => response.json())
+            .then(data => {
+                // Display vector DB stats
+                let statsHtml = '<ul style="list-style: none; padding: 0;">';
+                if (data.vector_db) {
+                    statsHtml += `<li><strong>Collections:</strong> ${data.vector_db.collections || 0}</li>`;
+                    statsHtml += `<li><strong>Total Documents:</strong> ${data.vector_db.total_documents || 0}</li>`;
+                    statsHtml += `<li><strong>Indexed Chunks:</strong> ${data.vector_db.indexed_chunks || 0}</li>`;
+                }
+                statsHtml += '</ul>';
+                document.getElementById('db-status').innerHTML = statsHtml;
+
+                // Display raw files
+                let filesHtml = '';
+                if (data.raw_files && data.raw_files.length > 0) {
+                    data.raw_files.forEach(filename => {
+                        filesHtml += `
+                            <li class="item-list-entry">
+                                <div>
+                                    <span class="item-list-entry-name">${filename}</span>
+                                </div>
+                                <div class="item-list-entry-actions">
+                                    <button class="btn btn-sm btn-danger" onclick="deleteFile('${filename}')">Delete</button>
+                                </div>
+                            </li>
+                        `;
+                    });
+                } else {
+                    filesHtml = '<li class="item-list-entry"><p style="color: var(--color-text-light); margin: 0;">No documents uploaded yet.</p></li>';
+                }
+                document.getElementById('files-list').innerHTML = filesHtml;
+            })
+            .catch(error => {
+                document.getElementById('db-status').innerHTML = '<p style="color: red;">Failed to load database info</p>';
+                console.error('Error:', error);
+            });
+    }
+
+    function uploadDocuments() {
+        const fileInput = document.getElementById('files');
+        const files = fileInput.files;
+
+        if (files.length === 0) {
+            alert('Please select files to upload');
+            return;
+        }
+
+        const formData = new FormData();
+        for (let file of files) {
+            formData.append('files', file);
+        }
+
+        document.getElementById('upload-status').style.display = 'block';
+        document.getElementById('status-message').innerHTML = '<p style="color: #007bff;">Uploading...</p>';
+
+        fetch('http://127.0.0.1:8000/upload', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status-message').innerHTML = `<p style="color: green; margin: 0;"><strong>✓ Success:</strong> ${data.message}</p>`;
+                fileInput.value = '';
+                setTimeout(loadDatabaseInfo, 1000);
+                setTimeout(() => {
+                    document.getElementById('upload-status').style.display = 'none';
+                }, 5000);
+            })
+            .catch(error => {
+                document.getElementById('status-message').innerHTML = `<p style="color: red; margin: 0;"><strong>✗ Error:</strong> ${error.message}</p>`;
+            });
+    }
+
+    function deleteFile(filename) {
+        if (!confirm(`Delete ${filename} and all its indexed data?`)) return;
+
+        fetch(`http://127.0.0.1:8000/raw_docs?filename=${encodeURIComponent(filename)}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('File deleted successfully');
+                loadDatabaseInfo();
+            })
+            .catch(error => alert('Failed to delete file: ' + error.message));
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', loadDatabaseInfo);
+</script>
+{% endblock %}

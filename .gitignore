@@ -1,0 +1,34 @@
+# === Python Bytecode / Cache Files ===
+__pycache__/
+*.py[cod]
+*.so
+
+# === Virtual Environments ===
+chat/
+venv/
+
+# === Environment Configs ===
+.env
+*.env
+
+# === Logs and Temporary Files ===
+*.log
+*.tmp
+
+# === Local SQLite Databases ===
+*.sqlite3
+*.db
+
+# === Runtime Uploaded & Generated Files ===
+uploads/
+static/previews/
+static/audio/
+
+# === Editor & System Files ===
+.vscode/
+.DS_Store
+Thumbs.db
+
+# TTS module (contains API key)
+
+
